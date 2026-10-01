@@ -1,0 +1,80 @@
+# CLAUDE.md
+
+Guidance for AI assistants working in the SeatRush repository.
+
+## Project context
+
+SeatRush is an event ticketing system and a **learning lab for system design in .NET on Azure**. The owner (Mohamad) makes the architectural decisions and reviews every change; you implement them.
+
+Because this is a learning project, some patterns are used **deliberately** even where a simpler solution would work. When you apply a pattern, explain briefly **why it's used here and when it wouldn't be**.
+
+Read before starting any task:
+- `README.md`: goals, architecture, roadmap
+- `docs/adr/`: architecture decisions (these are binding)
+
+## Tech stack
+
+- .NET 10, ASP.NET Core **controllers**
+- EF Core with SQL Server (local: Docker via .NET Aspire; cloud: Azure SQL)
+- Redis, Azure Service Bus, Azure Functions, Blob Storage (added per phase)
+- xUnit + Testcontainers
+- GitHub Actions, Docker, Terraform/Bicep
+
+## Architecture
+
+**Modular monolith.** Modules: `Events`, `Booking`, `Payments`, `Notifications`.
+
+- Each module has its own `Domain`, `Application`, and `Infrastructure` layers.
+- **Modules never reference each other directly.** They communicate only through public contracts or integration events.
+- `Shared` contains common abstractions only. No business logic.
+- No new module, cross-module dependency, or major library **without an ADR**. If one seems needed, stop and propose it.
+
+**CQRS-lite.** Commands (writes) and queries (reads) are separate, with **one handler per use case**, organized by feature (vertical slices), e.g. `Booking/Features/HoldSeat/`. Same database for reads and writes. No MediatR; use the project's own handler abstractions.
+
+**Domain model.**
+- `Booking` and `Payments` use a **rich domain model**: business rules live in entities and value objects, with private setters, factory methods, and domain events.
+- `Events` and other simple areas may use straightforward CRUD.
+- Controllers are thin: validate → dispatch to a handler → map the result. No business logic in controllers.
+
+## Coding conventions
+
+- Async all the way. Pass `CancellationToken` everywhere. Never use `.Result` or `.Wait()`.
+- Use `AsNoTracking()` for read-only queries.
+- Errors: domain errors via the Result pattern; return RFC 7807 problem details from the API.
+- Validation with FluentValidation at the edge; invariants enforced in the domain.
+- Use only patterns planned for the current phase. Add a short comment or PR note on **why / when not**.
+- Prefer clear, explicit code over clever code.
+
+## Database
+
+- **One DbContext and one schema per module.**
+- **Never edit a migration that has been applied.** Always add a new migration.
+- Name migrations descriptively (e.g. `AddSeatHoldExpiry`).
+
+## Testing
+
+- **Every feature ships with tests:**
+  - Unit tests for domain logic and handlers
+  - Integration tests with Testcontainers for persistence and API endpoints
+- Architecture tests enforce module boundaries; never weaken them to make code compile.
+- All tests must pass before a PR is opened.
+
+## Security
+
+- **No secrets in code or committed config files.** Use user-secrets locally and Azure Key Vault in the cloud.
+- Never log personal or payment data.
+
+## Workflow
+
+- One feature per branch (`feature/<short-name>`), small focused PRs.
+- **Do not touch files outside the scope of the task.**
+- **Ask before guessing.** If a requirement is unclear, ask; never invent business rules.
+- PR description must include:
+  - **What** changed
+  - **Why**
+  - **Trade-offs** and alternatives considered
+  - **How to test**
+
+## Commands
+
+*To be added in Phase 1 (build, test, run with Aspire, add migration).*
