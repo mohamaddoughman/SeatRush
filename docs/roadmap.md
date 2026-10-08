@@ -51,7 +51,11 @@ The plan for building SeatRush, phase by phase. It is a living document: it chan
 - **Events before Identity:** Events is plain CRUD, the simplest module to learn the full slice pattern on. Making Events endpoints admin-only later is cheap (`[Authorize]`). Identity must come before **Booking**, where the user is part of the business logic.
 - CI and CD are **separate workflows** (`ci.yml` now, `deploy.yml` in Phase 4): different triggers, different permissions, and no cloud credentials in the PR workflow.
 
-**Open at step start:** what an Event contains (venue, date, seat layout, statuses). These are business rules, so Mohamad decides them.
+**Open at step 1.4 start**
+- What an Event contains (venue, date, seat layout, statuses). These are business rules, so Mohamad decides them.
+- **Local database persistence:** today the AppHost uses Aspire's defaults, so every run starts with an empty database on a random port. Recommendation: keep SQL Server in Docker (same version everywhere; Docker is needed anyway for Testcontainers and Redis) and add `.WithDataVolume()` + `.WithLifetime(ContainerLifetime.Persistent)` so data survives restarts and the connection details stay stable (e.g. for Rider's database tools). A local SQL Server install was considered and rejected.
+- **How migrations are applied locally:** automatically at Api startup in Development, by a separate migration service in Aspire, or by hand with `dotnet ef database update`.
+- **Seed data:** sample data created from code, so a fresh or reset database is usable in seconds.
 
 **Out of scope:** seat holds, concurrency, Redis usage, payments, Azure.
 
