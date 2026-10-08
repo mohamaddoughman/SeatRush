@@ -16,6 +16,8 @@ Read before starting any task:
 
 **Teaching.** Mohamad decides; you explain. Present open decisions **one at a time**: options, trade-offs, a recommendation, and when the recommendation would be wrong. When code applies a principle from the coding guidelines in a non-obvious way, name it in the PR or a short comment.
 
+**Project files are the source of truth, not AI memory.** Everything needed to continue work lives in the repo: plan and progress in `docs/roadmap.md`, decisions in `docs/adr/`, rules here and in `docs/coding-guidelines.md`. When a step finishes, a decision is made, or work stops halfway, record it in those files, not in an assistant's private memory or notes.
+
 ## Tech stack
 
 - .NET 10, ASP.NET Core **controllers**
