@@ -9,8 +9,14 @@ SeatRush is an event ticketing system and a **learning lab for system design in 
 Because this is a learning project, some patterns are used **deliberately** even where a simpler solution would work. When you apply a pattern, explain briefly **why it's used here and when it wouldn't be**.
 
 Read before starting any task:
-- `README.md`: goals, architecture, roadmap
+- `README.md`: goals and architecture
+- `docs/roadmap.md`: the phase plan, the current step, and decisions already made. **Find where the task fits before starting.** Don't build things planned for a later phase. Update the step's status in the PR that finishes it.
 - `docs/adr/`: architecture decisions (these are binding)
+- `docs/coding-guidelines.md`: how code should be written (access modifiers, SOLID, domain modeling)
+
+**Teaching.** Mohamad decides; you explain. Present open decisions **one at a time**: options, trade-offs, a recommendation, and when the recommendation would be wrong. When code applies a principle from the coding guidelines in a non-obvious way, name it in the PR or a short comment.
+
+**Project files are the source of truth, not AI memory.** Everything needed to continue work lives in the repo: plan and progress in `docs/roadmap.md`, decisions in `docs/adr/`, rules here and in `docs/coding-guidelines.md`. When a step finishes, a decision is made, or work stops halfway, record it in those files, not in an assistant's private memory or notes.
 
 ## Tech stack
 
@@ -18,7 +24,7 @@ Read before starting any task:
 - EF Core with SQL Server (local: Docker via .NET Aspire; cloud: Azure SQL)
 - Redis, Azure Service Bus, Azure Functions, Blob Storage (added per phase)
 - xUnit + Testcontainers
-- GitHub Actions, Docker, Terraform/Bicep
+- GitHub Actions, Docker, Bicep (planned for Phase 6), k6 (planned for Phase 5)
 
 ## Architecture
 
@@ -44,6 +50,7 @@ Read before starting any task:
 - Validation with FluentValidation at the edge; invariants enforced in the domain.
 - Use only patterns planned for the current phase. Add a short comment or PR note on **why / when not**.
 - Prefer clear, explicit code over clever code.
+- Write senior-level code, not just code that works: follow `docs/coding-guidelines.md` and check a change against its review list before opening a PR.
 
 ## Database
 
@@ -66,7 +73,7 @@ Read before starting any task:
 
 ## Workflow
 
-- One feature per branch (`feature/<short-name>`), small focused PRs.
+- GitHub Flow: `main` is the only long-lived branch. One feature per branch (`feature/<short-name>`, or `docs/<short-name>` for documentation only), small focused PRs.
 - **Do not touch files outside the scope of the task.**
 - **Ask before guessing.** If a requirement is unclear, ask; never invent business rules.
 - PR description must include:
@@ -74,6 +81,17 @@ Read before starting any task:
   - **Why**
   - **Trade-offs** and alternatives considered
   - **How to test**
+  - **Review findings**: what the checks below found and how each was handled (omit if none ran or nothing was found)
+  - **Learning notes**: patterns and principles applied, and when they wouldn't fit (omit for trivial or docs-only PRs)
+
+### Before opening a PR
+
+1. `dotnet build SeatRush.slnx` and `dotnet test --solution SeatRush.slnx` are green. **Always.**
+2. Self-check the change against the review list in `docs/coding-guidelines.md`. *Code changes.*
+3. Run `/code-review medium` (bugs and edge cases; without `--fix`). Fix the findings and explain each one. *Code changes.*
+4. Run `/security-review`. *Only for security-sensitive changes: Identity, Payments, secrets/configuration, deploy workflows.*
+
+Skip steps 2–4 for docs-only and trivial changes (a rename, a version bump). These checks make PRs better; Mohamad's review is the final gate.
 
 ## Commands
 
