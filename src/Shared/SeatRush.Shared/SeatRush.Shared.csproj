@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Common abstractions only. References no other project and holds no business logic. -->
+
+</Project>

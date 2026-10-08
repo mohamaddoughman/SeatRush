@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    Composition root: the only project allowed to reference module internals, and only to call
+    each module's Add<Module>Module() registration method.
+  -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\aspire\SeatRush.ServiceDefaults\SeatRush.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\Modules\Booking\SeatRush.Booking.Infrastructure\SeatRush.Booking.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Events\SeatRush.Events.Infrastructure\SeatRush.Events.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\SeatRush.Identity.Infrastructure\SeatRush.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Notifications\SeatRush.Notifications.Infrastructure\SeatRush.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Payments\SeatRush.Payments.Infrastructure\SeatRush.Payments.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

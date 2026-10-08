@@ -1,0 +1,47 @@
+<Solution>
+  <Folder Name="/aspire/">
+    <Project Path="aspire/SeatRush.AppHost/SeatRush.AppHost.csproj" />
+    <Project Path="aspire/SeatRush.ServiceDefaults/SeatRush.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Api/">
+    <Project Path="src/Api/SeatRush.Api/SeatRush.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Booking/">
+    <Project Path="src/Modules/Booking/SeatRush.Booking.Application/SeatRush.Booking.Application.csproj" />
+    <Project Path="src/Modules/Booking/SeatRush.Booking.Contracts/SeatRush.Booking.Contracts.csproj" />
+    <Project Path="src/Modules/Booking/SeatRush.Booking.Domain/SeatRush.Booking.Domain.csproj" />
+    <Project Path="src/Modules/Booking/SeatRush.Booking.Infrastructure/SeatRush.Booking.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Events/">
+    <Project Path="src/Modules/Events/SeatRush.Events.Application/SeatRush.Events.Application.csproj" />
+    <Project Path="src/Modules/Events/SeatRush.Events.Contracts/SeatRush.Events.Contracts.csproj" />
+    <Project Path="src/Modules/Events/SeatRush.Events.Domain/SeatRush.Events.Domain.csproj" />
+    <Project Path="src/Modules/Events/SeatRush.Events.Infrastructure/SeatRush.Events.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/SeatRush.Identity.Application/SeatRush.Identity.Application.csproj" />
+    <Project Path="src/Modules/Identity/SeatRush.Identity.Contracts/SeatRush.Identity.Contracts.csproj" />
+    <Project Path="src/Modules/Identity/SeatRush.Identity.Domain/SeatRush.Identity.Domain.csproj" />
+    <Project Path="src/Modules/Identity/SeatRush.Identity.Infrastructure/SeatRush.Identity.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/SeatRush.Notifications.Application/SeatRush.Notifications.Application.csproj" />
+    <Project Path="src/Modules/Notifications/SeatRush.Notifications.Contracts/SeatRush.Notifications.Contracts.csproj" />
+    <Project Path="src/Modules/Notifications/SeatRush.Notifications.Domain/SeatRush.Notifications.Domain.csproj" />
+    <Project Path="src/Modules/Notifications/SeatRush.Notifications.Infrastructure/SeatRush.Notifications.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Payments/">
+    <Project Path="src/Modules/Payments/SeatRush.Payments.Application/SeatRush.Payments.Application.csproj" />
+    <Project Path="src/Modules/Payments/SeatRush.Payments.Contracts/SeatRush.Payments.Contracts.csproj" />
+    <Project Path="src/Modules/Payments/SeatRush.Payments.Domain/SeatRush.Payments.Domain.csproj" />
+    <Project Path="src/Modules/Payments/SeatRush.Payments.Infrastructure/SeatRush.Payments.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/SeatRush.Shared/SeatRush.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SeatRush.ArchitectureTests/SeatRush.ArchitectureTests.csproj" />
+  </Folder>
+</Solution>

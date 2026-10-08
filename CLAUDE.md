@@ -22,7 +22,7 @@ Read before starting any task:
 
 ## Architecture
 
-**Modular monolith.** Modules: `Events`, `Booking`, `Payments`, `Notifications`.
+**Modular monolith.** Modules: `Identity`, `Events`, `Booking`, `Payments`, `Notifications` (see ADR 0001).
 
 - Each module has its own `Domain`, `Application`, and `Infrastructure` layers.
 - **Modules never reference each other directly.** They communicate only through public contracts or integration events.
@@ -77,4 +77,25 @@ Read before starting any task:
 
 ## Commands
 
-*To be added in Phase 1 (build, test, run with Aspire, add migration).*
+Prerequisites: .NET SDK 10.0.400+ (pinned in `global.json`), Docker Desktop running (for Aspire).
+
+```bash
+# Build everything (warnings are errors)
+dotnet build SeatRush.slnx
+
+# Run all tests (uses Microsoft.Testing.Platform, configured in global.json)
+dotnet test --solution SeatRush.slnx
+
+# Run locally with Aspire: starts SQL Server + Redis containers, the Api, and the dashboard
+dotnet run --project aspire/SeatRush.AppHost
+
+# Run only the Api, without Aspire or containers (health: http://localhost:5080/health)
+dotnet run --project src/Api/SeatRush.Api
+```
+
+*Add migration: to be added when the first module DbContext exists.*
+
+Notes:
+- Package versions live only in `Directory.Packages.props`; `.csproj` files use `<PackageReference Include="..." />` without a version.
+- The `Aspire.AppHost.Sdk` version is pinned in `global.json` (`msbuild-sdks`), not in the `.csproj`.
+- On Windows, Smart App Control blocks freshly built DLLs ("An Application Control policy has blocked this file"). It must be off on development machines.
