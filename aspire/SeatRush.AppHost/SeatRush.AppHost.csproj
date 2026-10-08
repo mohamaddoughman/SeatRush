@@ -1,0 +1,33 @@
+<Project Sdk="Aspire.AppHost.Sdk">
+
+  <!-- The Aspire.AppHost.Sdk version is pinned in global.json (msbuild-sdks). -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>73199567-e6a8-4da6-b92b-9a721576a163</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Redis" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Api\SeatRush.Api\SeatRush.Api.csproj" />
+  </ItemGroup>
+
+  <!--
+    Workaround: Aspire.Hosting.AppHost depends on ModelContextProtocol.Core, which ships an unsigned
+    analyzer DLL. Windows Smart App Control blocks unsigned DLLs, so the compiler cannot load it and
+    the build fails (CS8034). The analyzer only checks code that defines MCP tools, which the AppHost
+    never does, so removing it loses nothing. Applied on every OS to keep builds identical everywhere.
+    Remove this target once the package ships a signed analyzer.
+  -->
+  <Target Name="RemoveUnsignedMcpAnalyzer" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)" Condition="'%(Filename)' == 'ModelContextProtocol.Analyzers'" />
+    </ItemGroup>
+  </Target>
+
+</Project>

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SeatRush.Notifications.Contracts\SeatRush.Notifications.Contracts.csproj" />
+    <ProjectReference Include="..\SeatRush.Notifications.Domain\SeatRush.Notifications.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Shared\SeatRush.Shared\SeatRush.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

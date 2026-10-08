@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SeatRush.Booking.Contracts\SeatRush.Booking.Contracts.csproj" />
+    <ProjectReference Include="..\SeatRush.Booking.Domain\SeatRush.Booking.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Shared\SeatRush.Shared\SeatRush.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
