@@ -81,6 +81,17 @@ Read before starting any task:
   - **Why**
   - **Trade-offs** and alternatives considered
   - **How to test**
+  - **Review findings**: what the checks below found and how each was handled (omit if none ran or nothing was found)
+  - **Learning notes**: patterns and principles applied, and when they wouldn't fit (omit for trivial or docs-only PRs)
+
+### Before opening a PR
+
+1. `dotnet build SeatRush.slnx` and `dotnet test --solution SeatRush.slnx` are green. **Always.**
+2. Self-check the change against the review list in `docs/coding-guidelines.md`. *Code changes.*
+3. Run `/code-review medium` (bugs and edge cases; without `--fix`). Fix the findings and explain each one. *Code changes.*
+4. Run `/security-review`. *Only for security-sensitive changes: Identity, Payments, secrets/configuration, deploy workflows.*
+
+Skip steps 2–4 for docs-only and trivial changes (a rename, a version bump). These checks make PRs better; Mohamad's review is the final gate.
 
 ## Commands
 
