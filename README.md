@@ -35,7 +35,7 @@ flowchart LR
     API -.-> OTel[OpenTelemetry → App Insights]
 ```
 
-**Modules:** Events · Booking · Payments · Notifications
+**Modules:** Identity · Events · Booking · Payments · Notifications
 
 ## Tech stack
 
@@ -45,18 +45,20 @@ flowchart LR
 | Data | SQL Server / Azure SQL, Redis |
 | Messaging | Azure Service Bus, Outbox pattern |
 | Cloud | Azure Container Apps, Functions, Blob Storage, Key Vault |
-| DevOps | Docker, GitHub Actions, Terraform / Bicep, .NET Aspire |
+| DevOps | Docker, GitHub Actions, Bicep, .NET Aspire |
 | Observability | OpenTelemetry, Application Insights |
-| Testing | xUnit, Testcontainers, k6 / NBomber |
+| Testing | xUnit, Testcontainers, k6 |
 
 ## Roadmap
 
-- [ ] **Phase 1: Foundations:** modular monolith skeleton, Events module, CI/CD to Azure
-- [ ] **Phase 2: Booking under pressure:** seat holds, locking strategies, Redis
+- [ ] **Phase 1: Foundations:** modular monolith skeleton, CI, Events module (local)
+- [ ] **Phase 2: Booking under pressure:** identity, seat holds, locking strategies, Redis
 - [ ] **Phase 3: Payments & reliability:** idempotency, outbox, sagas, Polly
-- [ ] **Phase 4: Async & cloud:** Service Bus, Functions, Blob Storage, notifications
+- [ ] **Phase 4: Async & cloud:** first Azure deploy + CD, Service Bus, Functions, Blob Storage, notifications
 - [ ] **Phase 5: Scale & observe:** caching, waiting room, load and chaos testing
 - [ ] **Phase 6: Production-ready:** IaC, zero-downtime deploys, security, cost tuning
+
+The detailed plan, current step, and decisions per phase are in [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Experiments & benchmarks
 

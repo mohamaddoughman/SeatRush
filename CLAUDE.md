@@ -9,8 +9,12 @@ SeatRush is an event ticketing system and a **learning lab for system design in 
 Because this is a learning project, some patterns are used **deliberately** even where a simpler solution would work. When you apply a pattern, explain briefly **why it's used here and when it wouldn't be**.
 
 Read before starting any task:
-- `README.md`: goals, architecture, roadmap
+- `README.md`: goals and architecture
+- `docs/roadmap.md`: the phase plan, the current step, and decisions already made. **Find where the task fits before starting.** Don't build things planned for a later phase. Update the step's status in the PR that finishes it.
 - `docs/adr/`: architecture decisions (these are binding)
+- `docs/coding-guidelines.md`: how code should be written (access modifiers, SOLID, domain modeling)
+
+**Teaching.** Mohamad decides; you explain. Present open decisions **one at a time**: options, trade-offs, a recommendation, and when the recommendation would be wrong. When code applies a principle from the coding guidelines in a non-obvious way, name it in the PR or a short comment.
 
 ## Tech stack
 
@@ -18,7 +22,7 @@ Read before starting any task:
 - EF Core with SQL Server (local: Docker via .NET Aspire; cloud: Azure SQL)
 - Redis, Azure Service Bus, Azure Functions, Blob Storage (added per phase)
 - xUnit + Testcontainers
-- GitHub Actions, Docker, Terraform/Bicep
+- GitHub Actions, Docker, Bicep (planned for Phase 6), k6 (planned for Phase 5)
 
 ## Architecture
 
@@ -44,6 +48,7 @@ Read before starting any task:
 - Validation with FluentValidation at the edge; invariants enforced in the domain.
 - Use only patterns planned for the current phase. Add a short comment or PR note on **why / when not**.
 - Prefer clear, explicit code over clever code.
+- Write senior-level code, not just code that works: follow `docs/coding-guidelines.md` and check a change against its review list before opening a PR.
 
 ## Database
 
@@ -66,7 +71,7 @@ Read before starting any task:
 
 ## Workflow
 
-- One feature per branch (`feature/<short-name>`), small focused PRs.
+- GitHub Flow: `main` is the only long-lived branch. One feature per branch (`feature/<short-name>`, or `docs/<short-name>` for documentation only), small focused PRs.
 - **Do not touch files outside the scope of the task.**
 - **Ask before guessing.** If a requirement is unclear, ask; never invent business rules.
 - PR description must include:
