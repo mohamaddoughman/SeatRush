@@ -43,5 +43,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SeatRush.ArchitectureTests/SeatRush.ArchitectureTests.csproj" />
+    <Project Path="tests/SeatRush.Events.UnitTests/SeatRush.Events.UnitTests.csproj" />
   </Folder>
 </Solution>

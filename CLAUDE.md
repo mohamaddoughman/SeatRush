@@ -76,6 +76,7 @@ Read before starting any task:
 - GitHub Flow: `main` is the only long-lived branch. One feature per branch (`feature/<short-name>`, or `docs/<short-name>` for documentation only), small focused PRs.
 - **Do not touch files outside the scope of the task.**
 - **Ask before guessing.** If a requirement is unclear, ask; never invent business rules.
+- **Mohamad reviews before every commit (for now).** After a change: build + test, summarize what changed, then wait for Mohamad's OK before `git commit`, so anything can be discussed first. The PR review stays the final gate.
 - PR description must include:
   - **What** changed
   - **Why**
