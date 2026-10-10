@@ -37,6 +37,27 @@ dotnet_style_readonly_field = true:warning
 dotnet_diagnostic.IDE0005.severity = warning
 csharp_style_unused_value_expression_statement_preference = discard_variable:suggestion
 
+# Naming rules below are checked in the IDE only, not by `dotnet build` or CI.
+# The build would need dotnet_diagnostic.IDE1006.severity set; we chose not to fail builds over naming.
+
+# Naming: constants and static readonly fields are PascalCase (HoldDuration), even when private.
+# This rule is more specific (it has required_modifiers), so it wins over the _camelCase rule below.
+dotnet_naming_rule.constants_pascal_case.severity = warning
+dotnet_naming_rule.constants_pascal_case.symbols = constant_fields
+dotnet_naming_rule.constants_pascal_case.style = pascal_case
+dotnet_naming_symbols.constant_fields.applicable_kinds = field
+dotnet_naming_symbols.constant_fields.applicable_accessibilities = *
+dotnet_naming_symbols.constant_fields.required_modifiers = const
+
+dotnet_naming_rule.static_readonly_pascal_case.severity = warning
+dotnet_naming_rule.static_readonly_pascal_case.symbols = static_readonly_fields
+dotnet_naming_rule.static_readonly_pascal_case.style = pascal_case
+dotnet_naming_symbols.static_readonly_fields.applicable_kinds = field
+dotnet_naming_symbols.static_readonly_fields.applicable_accessibilities = *
+dotnet_naming_symbols.static_readonly_fields.required_modifiers = static, readonly
+
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
 # Naming: private fields are _camelCase
 dotnet_naming_rule.private_fields_underscore.severity = warning
 dotnet_naming_rule.private_fields_underscore.symbols = private_fields
