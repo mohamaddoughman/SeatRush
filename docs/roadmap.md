@@ -44,7 +44,18 @@ The plan for building SeatRush, phase by phase. It is a living document: it chan
 | 1.1 | Solution skeleton: modules, Shared abstractions, Aspire, architecture tests (PR #3) | Module boundaries, enforcing architecture with tests | ✅ |
 | 1.2 | Verify the Aspire AppHost run (SQL Server + Redis containers healthy) | Local orchestration with Aspire | ✅ |
 | 1.3 | CI: `.github/workflows/ci.yml` runs build + tests on every PR; then branch protection on `main` | Continuous integration, automated quality gates | ✅ |
-| 1.4 | Events module (several PRs; breakdown decided when the step starts) | Vertical slices, CQRS-lite, EF Core with one schema per module, migrations, FluentValidation, problem details, Testcontainers | ⬜ |
+| 1.4 | Events module (several PRs, see breakdown below) | Vertical slices, CQRS-lite, EF Core with one schema per module, migrations, FluentValidation, problem details, Testcontainers | 🔄 |
+
+**Step 1.4 breakdown**
+
+| # | PR | Contents | Status |
+|---|---|---|---|
+| 1.4a | Domain + application (`feature/events-create-and-get`) | `Event` entity and errors, `CreateEvent` and `GetEventById` slices (handlers, validator, abstractions), unit tests | ✅ |
+| 1.4b | Persistence | `EventsDbContext` with the `events` schema, first migration, repository and query implementations, local database persistence, how migrations are applied, Testcontainers integration tests | ⬜ |
+| 1.4c | API | `EventsController` (create, get by id), FluentValidation at the edge, Result → RFC 7807 problem details, API integration tests | ⬜ |
+| 1.4d | Seed data | Sample events created from code for a fresh or reset local database | ⬜ |
+
+Further slices (listing, updating, publishing, cancelling events) are decided after 1.4c.
 
 **Decided**
 - Phase 1 is **local only**. CD to Azure moved to Phase 4.
@@ -53,12 +64,13 @@ The plan for building SeatRush, phase by phase. It is a living document: it chan
 - **CI triggers:** `pull_request` and `push` to `main`. The run on `main` catches two PRs that pass alone but break once both are merged.
 - **CI runs on `ubuntu-latest` only:** Testcontainers needs Linux containers (Windows runners can't run them), and production runs Linux containers. Windows is covered by local development.
 - **`main` ruleset (`protect-main`):** PR required with 0 approvals (solo project; GitHub doesn't allow approving your own PR), CI job `build-and-test` must pass, no force pushes or deletion, no bypass (applies to admins too). "Branch must be up to date" is off: the `push`-to-`main` run covers it.
+- **Event contents (first version):** title (required, max 200), optional description (max 2000), `StartsAt` / `EndsAt` stored in UTC (must start in the future and end after it starts), and status `Draft → Published → Cancelled` (or `Draft → Cancelled`). New events start as `Draft`. There is no `Completed` status: an event is over once `EndsAt` has passed. Text is normalized in `Event.Create`: the title is trimmed and a blank description is stored as `null` (lengths count the trimmed text).
+- **Migrations are applied by a separate migration service in Aspire** *(1.4b)*: a small worker project applies pending migrations and exits; the AppHost starts the Api only after it completes (`WaitForCompletion`). Migrating is a deploy step, not something the app does while running: the Api never needs schema-changing permissions, multiple instances can't race on startup, and the same service can run before the Api or from CD in Phase 4. `dotnet ef database update` stays available for running migrations by hand. *Rejected:* migrating at Api startup (fine locally, risky habit to carry to Azure) and manual-only (easy to forget; a fresh database wouldn't be usable in seconds).
+- **Local database persistence** *(1.4b)*: SQL Server stays in Docker (same version everywhere; Docker is needed anyway for Testcontainers and Redis) with `.WithLifetime(ContainerLifetime.Persistent)` + `.WithDataVolume()`, a **fixed password** (secret parameter in the AppHost's user-secrets, never in code) and a **fixed host port** (`14330`, to avoid clashing with a local SQL Server on 1433). Data survives restarts, startup is fast, and the connection string is stable for Rider and `dotnet ef`. A clean database means deleting the volume (documented in the README). The empty-database path is still covered by Testcontainers integration tests. *Rejected:* Aspire defaults (data lost on every run, connection string changes) and persistence without fixed port/password (connection details still change). A local SQL Server install was considered and rejected.
 
-**Open at step 1.4 start**
-- What an Event contains (venue, date, seat layout, statuses). These are business rules, so Mohamad decides them.
-- **Local database persistence:** today the AppHost uses Aspire's defaults, so every run starts with an empty database on a random port. Recommendation: keep SQL Server in Docker (same version everywhere; Docker is needed anyway for Testcontainers and Redis) and add `.WithDataVolume()` + `.WithLifetime(ContainerLifetime.Persistent)` so data survives restarts and the connection details stay stable (e.g. for Rider's database tools). A local SQL Server install was considered and rejected.
-- **How migrations are applied locally:** automatically at Api startup in Development, by a separate migration service in Aspire, or by hand with `dotnet ef database update`.
-- **Seed data:** sample data created from code, so a fresh or reset database is usable in seconds.
+**Open in step 1.4**
+- **Venue and seat layout:** not part of the first version. Still to decide whether they belong to Events and when (seat layout matters for Booking in Phase 2).
+- **Seed data** *(1.4d)*: sample data created from code, so a fresh or reset database is usable in seconds.
 
 **Out of scope:** seat holds, concurrency, Redis usage, payments, Azure.
 
