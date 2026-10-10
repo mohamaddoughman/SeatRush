@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <!--
+    Applies database migrations and exits. Migrating is a deploy step, separate from running the app:
+    the Api never needs schema-changing permissions, and several Api instances can't race on startup.
+    Like the Api, it's a composition root: it may reference each module's Infrastructure, and only to call
+    its registration and migration methods.
+  -->
+
+  <PropertyGroup>
+    <UserSecretsId>4c83fcda-db52-4e13-9f2f-bbd4e87a3993</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <!-- Design-time only: makes this project the startup project for `dotnet ef`. Not shipped. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\aspire\SeatRush.ServiceDefaults\SeatRush.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\Modules\Events\SeatRush.Events.Infrastructure\SeatRush.Events.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

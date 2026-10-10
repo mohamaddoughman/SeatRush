@@ -7,6 +7,9 @@
   <Folder Name="/src/Api/">
     <Project Path="src/Api/SeatRush.Api/SeatRush.Api.csproj" />
   </Folder>
+  <Folder Name="/src/MigrationService/">
+    <Project Path="src/MigrationService/SeatRush.MigrationService/SeatRush.MigrationService.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/" />
   <Folder Name="/src/Modules/Booking/">
     <Project Path="src/Modules/Booking/SeatRush.Booking.Application/SeatRush.Booking.Application.csproj" />
@@ -43,6 +46,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SeatRush.ArchitectureTests/SeatRush.ArchitectureTests.csproj" />
+    <Project Path="tests/SeatRush.Events.IntegrationTests/SeatRush.Events.IntegrationTests.csproj" />
     <Project Path="tests/SeatRush.Events.UnitTests/SeatRush.Events.UnitTests.csproj" />
   </Folder>
 </Solution>
