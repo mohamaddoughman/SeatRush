@@ -43,7 +43,7 @@ The plan for building SeatRush, phase by phase. It is a living document: it chan
 |---|---|---|---|
 | 1.1 | Solution skeleton: modules, Shared abstractions, Aspire, architecture tests (PR #3) | Module boundaries, enforcing architecture with tests | ✅ |
 | 1.2 | Verify the Aspire AppHost run (SQL Server + Redis containers healthy) | Local orchestration with Aspire | ✅ |
-| 1.3 | CI: `.github/workflows/ci.yml` runs build + tests on every PR; then branch protection on `main` | Continuous integration, automated quality gates | 🔄 |
+| 1.3 | CI: `.github/workflows/ci.yml` runs build + tests on every PR; then branch protection on `main` | Continuous integration, automated quality gates | ✅ |
 | 1.4 | Events module (several PRs; breakdown decided when the step starts) | Vertical slices, CQRS-lite, EF Core with one schema per module, migrations, FluentValidation, problem details, Testcontainers | ⬜ |
 
 **Decided**
