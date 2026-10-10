@@ -1,0 +1,35 @@
+# CI: build and test every PR, and main after each merge.
+# Deploying is a separate workflow (deploy.yml, Phase 4), so this one never gets cloud credentials.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  # Running again on main catches two PRs that pass on their own but break once both are merged.
+  push:
+    branches: [main]
+
+# Least privilege: the job only needs to read the code.
+permissions:
+  contents: read
+
+jobs:
+  # The job name is the status check that the main ruleset requires. Renaming it breaks the rule.
+  build-and-test:
+    # Linux: Testcontainers needs Linux containers, and production runs Linux containers.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Installs the SDK pinned in global.json, so CI and local builds use the same version.
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Build
+        run: dotnet build SeatRush.slnx
+
+      - name: Test
+        run: dotnet test --solution SeatRush.slnx --no-build

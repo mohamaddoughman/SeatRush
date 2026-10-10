@@ -43,13 +43,16 @@ The plan for building SeatRush, phase by phase. It is a living document: it chan
 |---|---|---|---|
 | 1.1 | Solution skeleton: modules, Shared abstractions, Aspire, architecture tests (PR #3) | Module boundaries, enforcing architecture with tests | ✅ |
 | 1.2 | Verify the Aspire AppHost run (SQL Server + Redis containers healthy) | Local orchestration with Aspire | ✅ |
-| 1.3 | CI: `.github/workflows/ci.yml` runs build + tests on every PR; then branch protection on `main` | Continuous integration, automated quality gates | ⬜ |
+| 1.3 | CI: `.github/workflows/ci.yml` runs build + tests on every PR; then branch protection on `main` | Continuous integration, automated quality gates | 🔄 |
 | 1.4 | Events module (several PRs; breakdown decided when the step starts) | Vertical slices, CQRS-lite, EF Core with one schema per module, migrations, FluentValidation, problem details, Testcontainers | ⬜ |
 
 **Decided**
 - Phase 1 is **local only**. CD to Azure moved to Phase 4.
 - **Events before Identity:** Events is plain CRUD, the simplest module to learn the full slice pattern on. Making Events endpoints admin-only later is cheap (`[Authorize]`). Identity must come before **Booking**, where the user is part of the business logic.
 - CI and CD are **separate workflows** (`ci.yml` now, `deploy.yml` in Phase 4): different triggers, different permissions, and no cloud credentials in the PR workflow.
+- **CI triggers:** `pull_request` and `push` to `main`. The run on `main` catches two PRs that pass alone but break once both are merged.
+- **CI runs on `ubuntu-latest` only:** Testcontainers needs Linux containers (Windows runners can't run them), and production runs Linux containers. Windows is covered by local development.
+- **`main` ruleset (`protect-main`):** PR required with 0 approvals (solo project; GitHub doesn't allow approving your own PR), CI job `build-and-test` must pass, no force pushes or deletion, no bypass (applies to admins too). "Branch must be up to date" is off: the `push`-to-`main` run covers it.
 
 **Open at step 1.4 start**
 - What an Event contains (venue, date, seat layout, statuses). These are business rules, so Mohamad decides them.
