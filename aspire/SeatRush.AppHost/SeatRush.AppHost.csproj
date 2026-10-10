@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Api\SeatRush.Api\SeatRush.Api.csproj" />
+    <ProjectReference Include="..\..\src\MigrationService\SeatRush.MigrationService\SeatRush.MigrationService.csproj" />
   </ItemGroup>
 
   <!--

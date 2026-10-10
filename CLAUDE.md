@@ -112,7 +112,13 @@ dotnet run --project aspire/SeatRush.AppHost
 dotnet run --project src/Api/SeatRush.Api
 ```
 
-*Add migration: to be added when the first module DbContext exists.*
+```bash
+# Add a migration (example: Events). Needs ConnectionStrings:seatrush in the migration service's
+# user-secrets (see README); generating a migration doesn't connect to the database.
+dotnet ef migrations add <Name> --project src/Modules/Events/SeatRush.Events.Infrastructure --startup-project src/MigrationService/SeatRush.MigrationService --output-dir Persistence/Migrations
+```
+
+Migrations are applied by the `migrations` service when the AppHost starts; the Api never migrates.
 
 Notes:
 - Package versions live only in `Directory.Packages.props`; `.csproj` files use `<PackageReference Include="..." />` without a version.

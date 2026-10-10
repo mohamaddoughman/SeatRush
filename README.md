@@ -72,7 +72,59 @@ Key decisions and their trade-offs are recorded as ADRs in [`docs/adr`](docs/adr
 
 ## Running locally
 
-*Coming in Phase 1:* one command with .NET Aspire.
+**Prerequisites:** .NET SDK 10.0.400+ and Docker Desktop (running).
+
+**One-time setup:** choose a password for the local SQL Server container. SQL Server requires at least 8 characters, using three of: upper case, lower case, digits, symbols.
+
+```bash
+dotnet tool restore
+dotnet user-secrets set "Parameters:sql-password" "<your-password>" --project aspire/SeatRush.AppHost
+```
+
+**Run:**
+
+```bash
+dotnet run --project aspire/SeatRush.AppHost
+```
+
+Aspire starts SQL Server and Redis in Docker, runs the `migrations` service (applies pending migrations, then exits), and starts the Api once migrations have succeeded. The dashboard link is printed in the console.
+
+**The local database** keeps its data between runs (persistent container + data volume), with a stable connection string, e.g. for Rider:
+
+```text
+Server=127.0.0.1,14330;Database=seatrush;User ID=sa;Password=<your-password>;TrustServerCertificate=true
+```
+
+Don't change the password after the first run: SQL Server stores it in the data volume. To change it, reset the database.
+
+**Reset to an empty database:** stop the AppHost, then remove the SQL Server container and its data volume. The next run creates both again and reapplies all migrations.
+
+```bash
+docker ps -a --filter "name=sql"        # find the container
+docker rm -f <container>
+docker volume ls --filter "name=sql"    # find the volume (ends with -sql-data)
+docker volume rm <volume>
+```
+
+**Migrations** (each module owns its own, e.g. `src/Modules/Events/SeatRush.Events.Infrastructure/Persistence/Migrations`). `dotnet ef` uses the migration service as its startup project, which reads the connection string from its user-secrets. Store it once:
+
+```bash
+dotnet user-secrets set "ConnectionStrings:seatrush" "<connection string>" --project src/MigrationService/SeatRush.MigrationService
+```
+
+```bash
+# Add a migration (example for the Events module)
+dotnet ef migrations add <Name> \
+  --project src/Modules/Events/SeatRush.Events.Infrastructure \
+  --startup-project src/MigrationService/SeatRush.MigrationService \
+  --output-dir Persistence/Migrations
+```
+
+The AppHost applies migrations automatically. To apply them by hand instead:
+
+```bash
+dotnet ef database update --project src/Modules/Events/SeatRush.Events.Infrastructure --startup-project src/MigrationService/SeatRush.MigrationService
+```
 
 ## License
 
