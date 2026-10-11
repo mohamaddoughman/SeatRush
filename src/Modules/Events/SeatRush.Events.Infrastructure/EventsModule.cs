@@ -86,4 +86,22 @@ public static class EventsModule
 
         await dbContext.Database.MigrateAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// Adds the sample events that aren't in the database yet and returns how many were added. For local
+    /// development only: called by the migration service after migrating, in Development, never by the Api.
+    /// </summary>
+    public static async Task<int> SeedEventsDatabaseAsync(this IServiceProvider services, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        await using var scope = services.CreateAsyncScope();
+
+        // Created here rather than registered, so no host (the Api included) gets the seeder in its container.
+        var seeder = new EventsSeeder(
+            scope.ServiceProvider.GetRequiredService<EventsDbContext>(),
+            scope.ServiceProvider.GetRequiredService<TimeProvider>());
+
+        return await seeder.SeedAsync(cancellationToken);
+    }
 }

@@ -87,7 +87,7 @@ dotnet user-secrets set "Parameters:sql-password" "<your-password>" --project as
 dotnet run --project aspire/SeatRush.AppHost
 ```
 
-Aspire starts SQL Server and Redis in Docker, runs the `migrations` service (applies pending migrations, then exits), and starts the Api once migrations have succeeded. The dashboard link is printed in the console.
+Aspire starts SQL Server and Redis in Docker, runs the `migrations` service (applies pending migrations, adds any missing sample events, then exits), and starts the Api once it has succeeded. Sample data is added in Development only and never changes rows that already exist; reset the database to get fresh sample dates. The dashboard link is printed in the console.
 
 **The local database** keeps its data between runs (persistent container + data volume), with a stable connection string, e.g. for Rider:
 
@@ -97,7 +97,7 @@ Server=127.0.0.1,14330;Database=seatrush;User ID=sa;Password=<your-password>;Tru
 
 Don't change the password after the first run: SQL Server stores it in the data volume. To change it, reset the database.
 
-**Reset to an empty database:** stop the AppHost, then remove the SQL Server container and its data volume. The next run creates both again and reapplies all migrations.
+**Reset the database:** stop the AppHost, then remove the SQL Server container and its data volume. The next run creates both again, reapplies all migrations and adds the sample events.
 
 ```bash
 docker ps -a --filter "name=sql"        # find the container
