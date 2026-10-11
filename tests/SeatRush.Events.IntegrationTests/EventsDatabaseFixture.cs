@@ -18,7 +18,7 @@ namespace SeatRush.Events.IntegrationTests;
 /// <remarks>
 /// One container, not one per class: SQL Server takes 10–20 seconds to start. Tests stay independent by
 /// creating their own events (new GUIDs) and checking only those, so nothing is cleaned up and they can run
-/// in parallel. This breaks down once a test lists or counts all rows; then reset the data between tests.
+/// in parallel. A test that must know every row (counts, seeding) uses <see cref="CreateFreshDatabaseAsync"/>.
 /// </remarks>
 public sealed class EventsDatabaseFixture : IAsyncLifetime
 {
@@ -52,16 +52,7 @@ public sealed class EventsDatabaseFixture : IAsyncLifetime
             InitialCatalog = EventsModule.ConnectionStringName,
         }.ConnectionString;
 
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                [$"ConnectionStrings:{EventsModule.ConnectionStringName}"] = ConnectionString,
-            })
-            .Build();
-
-        _services = new ServiceCollection()
-            .AddEventsModule(configuration)
-            .BuildServiceProvider(validateScopes: true);
+        _services = CreateModuleServices(ConnectionString);
 
         // The same call the migration service makes: proves the migrations work on an empty database.
         await _services.MigrateEventsDatabaseAsync(cancellationToken);
@@ -87,6 +78,51 @@ public sealed class EventsDatabaseFixture : IAsyncLifetime
         }
 
         await _container.DisposeAsync();
+    }
+
+    /// <summary>
+    /// A new, migrated database of its own in the same container, for a test that must know every row (the shared
+    /// database has rows from other tests). The caller disposes it.
+    /// </summary>
+    /// <remarks>Takes a second or two per database, so use it only when a test can't work with its own rows.</remarks>
+    public async Task<FreshDatabase> CreateFreshDatabaseAsync(CancellationToken cancellationToken)
+    {
+        var connectionString = new SqlConnectionStringBuilder(ConnectionString)
+        {
+            InitialCatalog = $"{EventsModule.ConnectionStringName}_{Guid.NewGuid():N}",
+        }.ConnectionString;
+
+        var services = CreateModuleServices(connectionString);
+
+        // Migrating creates the database first.
+        await services.MigrateEventsDatabaseAsync(cancellationToken);
+
+        return new FreshDatabase(services, connectionString);
+    }
+
+    private static ServiceProvider CreateModuleServices(string connectionString)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [$"ConnectionStrings:{EventsModule.ConnectionStringName}"] = connectionString,
+            })
+            .Build();
+
+        return new ServiceCollection()
+            .AddEventsModule(configuration)
+            .BuildServiceProvider(validateScopes: true);
+    }
+
+    /// <summary>A database of one test's own: the module wired up against it, and its connection string.</summary>
+    public sealed class FreshDatabase(ServiceProvider services, string connectionString) : IAsyncDisposable
+    {
+        public IServiceProvider Services => services;
+
+        public string ConnectionString => connectionString;
+
+        // The database itself goes with the container at the end of the run.
+        public ValueTask DisposeAsync() => services.DisposeAsync();
     }
 
     /// <summary>The real Api (its Program), with the connection string pointed at the test container.</summary>
