@@ -48,6 +48,8 @@ namespace SeatRush.Events.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("StartsAt");
+
                     b.ToTable("Events", "events");
                 });
 #pragma warning restore 612, 618

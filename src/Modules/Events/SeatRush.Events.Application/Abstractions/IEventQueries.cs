@@ -1,4 +1,5 @@
 using SeatRush.Events.Application.Features.GetEventById;
+using SeatRush.Events.Application.Features.ListEvents;
 
 namespace SeatRush.Events.Application.Abstractions;
 
@@ -14,4 +15,6 @@ namespace SeatRush.Events.Application.Abstractions;
 public interface IEventQueries
 {
     Task<EventResponse?> GetByIdAsync(Guid eventId, CancellationToken cancellationToken);
+
+    Task<PagedResponse<EventResponse>> ListAsync(ListEventsQuery query, CancellationToken cancellationToken);
 }

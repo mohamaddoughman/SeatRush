@@ -41,6 +41,22 @@ public sealed class MigrationTests(EventsDatabaseFixture database)
     }
 
     [Fact]
+    public async Task The_events_table_has_an_index_on_the_start_time()
+    {
+        var indexedColumns = await QueryAsync(
+            """
+            SELECT c.name
+            FROM sys.indexes i
+            JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+            JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+            WHERE i.object_id = OBJECT_ID('events.Events') AND i.name = 'IX_Events_StartsAt'
+            """,
+            reader => reader.GetString(0));
+
+        Assert.Equal(["StartsAt"], indexedColumns);
+    }
+
+    [Fact]
     public async Task The_migration_history_is_kept_in_the_events_schema()
     {
         var historyTables = await QueryAsync(
