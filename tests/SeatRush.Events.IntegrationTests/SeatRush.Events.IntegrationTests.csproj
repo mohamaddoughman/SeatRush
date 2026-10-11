@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Testcontainers.MsSql" />
@@ -14,8 +15,12 @@
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 
-  <!-- Real SQL Server in Docker (Testcontainers): tests go through the module's public registration, like a host does. -->
+  <!--
+    Real SQL Server in Docker (Testcontainers). Persistence tests go through the module's public registration,
+    like a host does; API tests run the real Api in memory (WebApplicationFactory) against the same database.
+  -->
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Api\SeatRush.Api\SeatRush.Api.csproj" />
     <ProjectReference Include="..\..\src\Modules\Events\SeatRush.Events.Infrastructure\SeatRush.Events.Infrastructure.csproj" />
   </ItemGroup>
 
