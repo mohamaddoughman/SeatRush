@@ -54,8 +54,10 @@ The plan for building SeatRush, phase by phase. It is a living document: it chan
 | 1.4b | Persistence (`feature/events-persistence`) | `EventsDbContext` with the `events` schema, first migration, repository and query implementations, local database persistence, how migrations are applied, Testcontainers integration tests | ✅ |
 | 1.4c | API (`feature/events-api`) | `EventsController` (create, get by id), FluentValidation at the edge, Result → RFC 7807 problem details, OpenAPI document + Scalar UI (Development only), API integration tests | ✅ |
 | 1.4d | Seed data (`feature/events-seed-data`) | Sample events created from code for a fresh or reset local database | ✅ |
+| 1.4e | List events | The read side of CQRS-lite: a list query with paging, sorting and filtering (e.g. by date or status), projections, query parameters. Business rules (page size, defaults, which events are listed) decided at slice start | ⬜ |
+| 1.4f | Publish + Cancel | State transitions through domain methods (`Draft → Published → Cancelled`, `Draft → Cancelled`), the first real `409 Conflict`, published and cancelled seed samples. Rules (e.g. what can't be published or cancelled) decided at slice start | ⬜ |
 
-Further slices (listing, updating, publishing, cancelling events) are decided after 1.4c.
+**Step 1.4 and Phase 1 close when 1.4f merges** (both set to ✅ in that PR). Later Events work goes to the phase that needs it.
 
 **Planned refactor:** when the **third endpoint with validated input** arrives, move validation from the controller actions into a shared MVC action filter in the Api (decided in 1.4c; see Decided). Do it in that endpoint's PR.
 
@@ -80,9 +82,8 @@ Further slices (listing, updating, publishing, cancelling events) are decided af
 - **Seed data runs in the migration service, Development only** *(1.4d)*: each module exposes `Seed<Module>DatabaseAsync()` next to its migrate method; the migration service calls it after migrating when the environment is Development (set by its launch profile, which only local runs use). Samples are created through the domain (`Event.Create`), so they can't break a rule, with dates relative to the day of seeding. The Api never seeds, as it never migrates. *Rejected:* `HasData` (sample data would ship to every environment, and fixed dates go stale), EF Core's `UseAsyncSeeding` (sits in the DbContext registration the Api shares, less visible), seeding through the API (manual, needs the Api running). *Not for reference data* every environment needs (that belongs in migrations).
 - **Seeding adds missing samples on every run, matched by title** *(1.4d)*: a sample is added when no event has its title (case-insensitive); existing rows are never changed, so their dates stay as first seeded and a reset refreshes them. New samples (e.g. published or cancelled events once those slices exist) reach existing local databases automatically. An event you create with a sample's exact title counts as that sample. *Rejected:* seeding only an empty table (new samples would need a reset), a seed-history table (a whole mechanism for sample data).
 - **Sample contents: five realistic drafts** *(1.4d)*: concert, theater show, multi-day festival, conference, comedy night; with and without description, starting tomorrow to six months out. Drafts only, because the domain can only create events so far; later slices add published and cancelled samples through their domain methods. *Rejected:* writing other statuses directly (bypasses the domain), bulk volume data (no list endpoint yet; load data is Phase 5).
-
-**Open in step 1.4**
-- **Venue and seat layout:** not part of the first version. Still to decide whether they belong to Events and when (seat layout matters for Booking in Phase 2).
+- **Remaining Events slices: List, then Publish + Cancel** *(planned after 1.4d)*: each teaches something new (the read side; state transitions), and Booking needs published events. Publish and Cancel share one PR because they follow the same pattern. **Update is deferred until Booking exists:** whether a published event's date may change, and who is told, depends on tickets being sold. *Rejected:* all four slices now (would mean inventing Update's rules), closing Phase 1 without them (Booking would be blocked on Events work mid-phase). *If editing is needed earlier:* a narrow "update draft" slice is safe, since drafts can't have tickets.
+- **Venue and seat layout move to Phase 2** *(planned after 1.4d)*: decided at the start of Phase 2, when Booking's needs are known (per seat, per section, general admission). **Direction already set: seat availability (free / held / sold) belongs to Booking**, whatever owns the layout. Where the layout lives (Events, or a new Venues module with an ADR) is decided then. 1.4f's Publish ships with today's rules; a rule like "can't publish without a layout" would be added to it in Phase 2. *Rejected:* a layout slice in 1.4 (designing for a consumer that doesn't exist yet), a Venues module now (a sixth module before it's needed).
 
 **Out of scope:** seat holds, concurrency, Redis usage, payments, Azure.
 
@@ -96,6 +97,7 @@ Further slices (listing, updating, publishing, cancelling events) are decided af
 
 **Scope**
 - Identity (approach decided by ADR at phase start: ASP.NET Core Identity vs an external provider)
+- Venue and seat layout, decided at phase start: where the layout lives (Events, or a new Venues module with an ADR) and its shape, driven by how Booking holds seats. Seat availability belongs to Booking (decided in Phase 1)
 - Seat hold with expiry (first rich domain model: entities with rules, domain events)
 - Releasing expired holds (background processing, time as a business rule)
 - **Locking strategies compared:** pessimistic locks, optimistic concurrency, unique constraints, Redis atomic operations / distributed locks
