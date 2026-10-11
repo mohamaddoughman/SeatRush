@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +12,8 @@ using Testcontainers.MsSql;
 namespace SeatRush.Events.IntegrationTests;
 
 /// <summary>
-/// One SQL Server container for the whole test project, migrated once with the real migrations.
+/// One SQL Server container for the whole test project, migrated once with the real migrations, plus the real
+/// Api running in memory against it.
 /// </summary>
 /// <remarks>
 /// One container, not one per class: SQL Server takes 10–20 seconds to start. Tests stay independent by
@@ -26,11 +29,17 @@ public sealed class EventsDatabaseFixture : IAsyncLifetime
 
     private ServiceProvider? _services;
 
+    private ApiFactory? _api;
+
     /// <summary>The Events module wired up the way a host wires it, against the test database.</summary>
     public IServiceProvider Services =>
         _services ?? throw new InvalidOperationException("The fixture has not been initialized.");
 
     public string ConnectionString { get; private set; } = string.Empty;
+
+    /// <summary>An HTTP client for the real Api (same pipeline, middleware and configuration), in memory.</summary>
+    public HttpClient CreateApiClient() =>
+        (_api ?? throw new InvalidOperationException("The fixture has not been initialized.")).CreateClient();
 
     public async ValueTask InitializeAsync()
     {
@@ -56,15 +65,34 @@ public sealed class EventsDatabaseFixture : IAsyncLifetime
 
         // The same call the migration service makes: proves the migrations work on an empty database.
         await _services.MigrateEventsDatabaseAsync(cancellationToken);
+
+        // The Api reads the same connection string name as in Aspire; here it points at the test container.
+        _api = new ApiFactory(ConnectionString);
+
+        // Start the server now rather than on the first CreateClient(): that call isn't thread-safe and runs from
+        // test-class constructors in parallel, and a startup failure should fail here, not inside some test.
+        _ = _api.Server;
     }
 
     public async ValueTask DisposeAsync()
     {
+        if (_api is not null)
+        {
+            await _api.DisposeAsync();
+        }
+
         if (_services is not null)
         {
             await _services.DisposeAsync();
         }
 
         await _container.DisposeAsync();
+    }
+
+    /// <summary>The real Api (its Program), with the connection string pointed at the test container.</summary>
+    private sealed class ApiFactory(string connectionString) : WebApplicationFactory<Program>
+    {
+        protected override void ConfigureWebHost(IWebHostBuilder builder) =>
+            builder.UseSetting($"ConnectionStrings:{EventsModule.ConnectionStringName}", connectionString);
     }
 }

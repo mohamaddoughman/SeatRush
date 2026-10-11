@@ -1,9 +1,15 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using SeatRush.Events.Application.Abstractions;
+using SeatRush.Events.Application.Features.CreateEvent;
+using SeatRush.Events.Application.Features.GetEventById;
 using SeatRush.Events.Infrastructure.Persistence;
+using SeatRush.Shared.Messaging;
+using SeatRush.Shared.Results;
 
 namespace SeatRush.Events.Infrastructure;
 
@@ -15,8 +21,9 @@ public static class EventsModule
     public const string ConnectionStringName = "seatrush";
 
     /// <summary>
-    /// Registers everything the Events module needs. Called once by each host (the composition roots):
-    /// the Api and the migration service.
+    /// Registers the Events module's services (persistence, handlers, validators). Called once by each host (the
+    /// composition roots): the Api and the migration service. HTTP endpoints are added separately
+    /// (<see cref="AddEventsEndpoints"/>).
     /// </summary>
     /// <remarks>
     /// Registration lives in Infrastructure because it is the only layer that can see the whole module
@@ -39,7 +46,32 @@ public static class EventsModule
         services.AddScoped<IEventQueries, EventQueries>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        // One line per use case, no assembly scanning: what the module offers is visible here.
+        services.AddScoped<ICommandHandler<CreateEventCommand, Result<Guid>>, CreateEventHandler>();
+        services.AddScoped<IQueryHandler<GetEventByIdQuery, Result<EventResponse>>, GetEventByIdHandler>();
+
+        // Validators are stateless, so one instance is shared.
+        services.AddSingleton<IValidator<CreateEventCommand>, CreateEventValidator>();
+
+        // TryAdd: the host (or a test) may register its own clock first.
+        services.TryAddSingleton(TimeProvider.System);
+
         return services;
+    }
+
+    /// <summary>
+    /// Adds the Events module's controllers to a web host. Called only by the Api, next to <see cref="AddEventsModule"/>.
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="AddEventsModule"/> so a host that doesn't serve HTTP (the migration service, later
+    /// Azure Functions) gets the module's services without the MVC stack. The controllers live in this assembly
+    /// (ADR 0002); the host discovers them through this application part.
+    /// </remarks>
+    public static IMvcBuilder AddEventsEndpoints(this IMvcBuilder mvc)
+    {
+        ArgumentNullException.ThrowIfNull(mvc);
+
+        return mvc.AddApplicationPart(typeof(EventsModule).Assembly);
     }
 
     /// <summary>
