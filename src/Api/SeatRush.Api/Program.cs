@@ -1,5 +1,6 @@
 using Scalar.AspNetCore;
 using SeatRush.Api.Json;
+using SeatRush.Api.ModelBinding;
 using SeatRush.Booking.Infrastructure;
 using SeatRush.Events.Infrastructure;
 using SeatRush.Identity.Infrastructure;
@@ -15,10 +16,20 @@ builder.AddServiceDefaults();
 // place that validates field values, and a client gets every field error in one consistent format. A body that
 // isn't valid JSON (or has a wrongly typed value) is still rejected by [ApiController] before the action runs,
 // with JSON-path keys like "$.startsAt": a malformed request, not a rule violation.
+// The same input rules in JSON bodies (ApiJsonConventions) and query strings (the strict binders): date-times need
+// a UTC offset, and enums are their names, never numbers.
 builder.Services
-    .AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true)
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new StrictDateTimeOffsetConverter()))
+    .AddControllers(options =>
+    {
+        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+        options.ModelBinderProviders.Insert(0, new StrictDateTimeOffsetModelBinderProvider());
+        options.ModelBinderProviders.Insert(0, new StrictEnumModelBinderProvider());
+    })
+    .AddJsonOptions(options => ApiJsonConventions.Apply(options.JsonSerializerOptions))
     .AddEventsEndpoints();
+
+// The OpenAPI generator describes types with these (minimal-API) options, not MVC's: same conventions.
+builder.Services.ConfigureHttpJsonOptions(options => ApiJsonConventions.Apply(options.SerializerOptions));
 
 // Unhandled exceptions and empty error responses become RFC 7807 problem details.
 builder.Services.AddProblemDetails();

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using SeatRush.Events.Application.Abstractions;
 using SeatRush.Events.Application.Features.CreateEvent;
 using SeatRush.Events.Application.Features.GetEventById;
+using SeatRush.Events.Application.Features.ListEvents;
 using SeatRush.Events.Infrastructure.Persistence;
 using SeatRush.Shared.Messaging;
 using SeatRush.Shared.Results;
@@ -49,9 +50,11 @@ public static class EventsModule
         // One line per use case, no assembly scanning: what the module offers is visible here.
         services.AddScoped<ICommandHandler<CreateEventCommand, Result<Guid>>, CreateEventHandler>();
         services.AddScoped<IQueryHandler<GetEventByIdQuery, Result<EventResponse>>, GetEventByIdHandler>();
+        services.AddScoped<IQueryHandler<ListEventsQuery, Result<PagedResponse<EventResponse>>>, ListEventsHandler>();
 
         // Validators are stateless, so one instance is shared.
         services.AddSingleton<IValidator<CreateEventCommand>, CreateEventValidator>();
+        services.AddSingleton<IValidator<ListEventsQuery>, ListEventsValidator>();
 
         // TryAdd: the host (or a test) may register its own clock first.
         services.TryAddSingleton(TimeProvider.System);

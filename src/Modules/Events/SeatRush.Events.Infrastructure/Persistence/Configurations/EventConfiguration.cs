@@ -24,5 +24,9 @@ internal sealed class EventConfiguration : IEntityTypeConfiguration<Event>
 
         // Stored as int (EF Core's default for enums): the numbers in EventStatus are part of the stored data.
         builder.Property(@event => @event.Status);
+
+        // Serves the list's sort (StartsAt, then Id) and its date range filters. Id needs no column of its own:
+        // it's the clustered key, so every nonclustered index already carries it, in order after StartsAt.
+        builder.HasIndex(@event => @event.StartsAt);
     }
 }
